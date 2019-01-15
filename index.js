@@ -1,72 +1,29 @@
-module.exports = function arunBreathFix(dispatch) {
-    const mystic = 7
-    const arunBreath = 702012
-    const titanicFavor = 5
-    const boomerangPulse = 42
-    
-    let gameId,
-        job,
-        targets
+module.exports = function ArunBreathFix(mod) {
+  const arunBreath = 702012
+  const targets = new Set()
 
-    //S_LOGIN
-    dispatch.hook('S_LOGIN', 12, (event) => {
-        gameId = event.gameId
-        job = (event.templateId - 10101) % 100
-        targets = new Map()
-    })
+  mod.game.me.on('change_zone', () => { targets.clear() })
 
-    //S_LOAD_TOPO
-    dispatch.hook('S_LOAD_TOPO', 'raw', () => {
-        targets = new Map()
-    })
+  mod.hook('S_ABNORMALITY_BEGIN', 3, event => {
+    if (event.id === arunBreath && !mod.game.me.is(event.target))
+      targets.add(event.target)
+  })
 
-    //S_ABNORMALITY_BEGIN
-    dispatch.hook('S_ABNORMALITY_BEGIN', 3, addTarget)
+  mod.hook('S_ABNORMALITY_END', 1, event => {
+    if (event.id === arunBreath)
+      targets.delete(event.target)
+  })
 
-    //S_ABNORMALITY_REFRESH
-    dispatch.hook('S_ABNORMALITY_REFRESH', 1, addTarget)
-
-    // addTarget
-    function addTarget(event) {
-        if (job == mystic) {
-            if (event.id == arunBreath) {
-                if (event.target != gameId) {
-                    targets.set(event.target, true)
-                }
-            }
+  mod.hook('S_EACH_SKILL_RESULT', 12, event => {
+    if (mod.game.me.class === 'elementalist') {
+      if (mod.game.me.is(event.source) || mod.game.me.is(event.owner)) {
+        const skillGroup = Math.floor(event.skill.id / 10000)
+        if ([5, 42].includes(skillGroup) && targets.has(event.target)) {
+          event.damage = 15000
+          event.crit = false
+          mod.send('S_EACH_SKILL_RESULT', 12, event)
         }
+      }
     }
-
-    //S_ABNORMALITY_END
-    dispatch.hook('S_ABNORMALITY_END', 1, removeTarget)
-
-    // removeTarget
-    function removeTarget(event) {
-        if (job == mystic) {
-            if (event.id == arunBreath) {
-                targets.delete(event.target)
-            }
-        }
-    }
-
-    //S_EACH_SKILL_RESULT
-    dispatch.hook('S_EACH_SKILL_RESULT', 12, (event) => {
-        if (job == mystic) {
-            if (event.source == gameId || event.owner == gameId) {
-                let skill = Math.floor(event.skill.id / 10000)
-                //console.log('skill', skill)
-                if (skill == titanicFavor || skill == boomerangPulse) {
-                    if (targets.get(event.target)) {
-                        sendHeal(event)
-                    }
-                }
-            }
-        }
-    })
-
-    function sendHeal(event) {
-        event.damage = 15000
-        event.crit = false
-        dispatch.toClient('S_EACH_SKILL_RESULT', 12, event)
-    }
+  })
 }
