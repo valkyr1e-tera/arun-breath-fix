@@ -14,14 +14,14 @@ module.exports = function ArunBreathFix(mod) {
       targets.delete(event.target)
   })
 
-  mod.hook('S_EACH_SKILL_RESULT', 12, event => {
+  mod.hook('S_EACH_SKILL_RESULT', 13, event => {
     if (mod.game.me.class === 'elementalist') {
       if (mod.game.me.is(event.source) || mod.game.me.is(event.owner)) {
         const skillGroup = Math.floor(event.skill.id / 10000)
         if ([5, 42].includes(skillGroup) && targets.has(event.target)) {
           event.damage = 15000
           event.crit = false
-          mod.send('S_EACH_SKILL_RESULT', 12, event)
+          mod.send('S_EACH_SKILL_RESULT', 13, event)
         }
       }
     }

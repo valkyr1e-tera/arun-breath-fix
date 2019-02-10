@@ -1,11 +1,11 @@
 {
 	"files": {
-		"index.js": "0da0eeb09bec9d9591a73f50ee90ad763da9e02b53139d7e7d1be6df97655064",
+		"index.js": "f4fe1408188ba623d207aa069b11bacf44ffe8deb5bd0e4ed3356cde8d677398",
 		"module.json": "2f95ce4cc7c745f427ef373d00afcc0be3ccdca6ac9cd6266e7530aeac0b941e"
 	},
 	"defs": {
 		"S_ABNORMALITY_BEGIN": 3,
 		"S_ABNORMALITY_END": 1,
-		"S_EACH_SKILL_RESULT": 12
+		"S_EACH_SKILL_RESULT": 13
 	}
 }
